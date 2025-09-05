@@ -51,6 +51,23 @@ function s_r_cycle(
             record,
         )
         num_evals += tmp_num_evals
+        
+        # 在每个温度循环后对整个种群进行线性优化
+        if options.linear_optimization_method !== nothing
+            linear_evals = 0.0
+            for i in 1:pop.n
+                if rand() < 0.5  # 50%概率进行线性优化
+                    optimized_member, member_evals = optimize_linear_individual(
+                        pop.members[i], batched_dataset, options;
+                        method=options.linear_optimization_method
+                    )
+                    pop.members[i] = optimized_member
+                    linear_evals += member_evals
+                end
+            end
+            num_evals += linear_evals
+        end
+        
         for member in pop.members
             size = compute_complexity(member, options)
             if 0 < size <= options.maxsize && (
