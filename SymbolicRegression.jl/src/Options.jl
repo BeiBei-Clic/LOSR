@@ -1061,6 +1061,7 @@ $(OPTION_DESCRIPTIONS)
         hof_migration,
         should_simplify,
         should_optimize_constants,
+        linear_optimization_method,
         _output_directory,
         populations,
         perturbation_factor,
@@ -1110,7 +1111,6 @@ $(OPTION_DESCRIPTIONS)
         deterministic,
         define_helper_functions,
         use_recorder,
-        linear_optimization_method,
     )
 
     return options

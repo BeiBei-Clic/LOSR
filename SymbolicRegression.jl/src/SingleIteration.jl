@@ -73,7 +73,7 @@ function optimize_and_simplify_population(
     do_optimization = rand(pop.n) .< options.optimizer_probability
     
     # 根据linear_optimization_method参数决定是否进行线性优化
-    do_linear_optimization = (options.linear_optimization_method !== nothing) && (rand(pop.n) .< 0.5)
+    do_linear_optimization = (options.linear_optimization_method !== nothing) .&& (rand(pop.n) .< 0.5)
     
     should_thread = !(options.deterministic) && !(isa(options.autodiff_backend, AutoEnzyme))
     batched_dataset = options.batching ? batch(dataset, options.batch_size) : dataset
