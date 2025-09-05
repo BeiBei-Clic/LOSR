@@ -12,7 +12,7 @@ using ..AdaptiveParsimonyModule: RunningSearchStatistics
 using ..RegularizedEvolutionModule: reg_evol_cycle
 using ..LossFunctionsModule: eval_cost
 using ..ConstantOptimizationModule: optimize_constants
-using ..LinearOptimizationModule: optimize_multilinear_individual
+using ..LinearOptimizationModule: optimize_multilinear_individual, optimize_linear_individual
 using ..RecorderModule: @recorder
 
 # Cycle through regularized evolution many times,
@@ -67,54 +67,38 @@ function s_r_cycle(
 end
 
 function optimize_and_simplify_population(
-    dataset::D, pop::P, options::AbstractOptions, curmaxsize::Int, record::RecordType;
-    do_linear_optimization::Bool=true
+    dataset::D, pop::P, options::AbstractOptions, curmaxsize::Int, record::RecordType
 )::Tuple{P,Float64} where {T,L,D<:Dataset{T,L},P<:Population{T,L}}
-    # 创建一个数组用于存储每个个体的评估次数
     array_num_evals = zeros(Float64, pop.n)
-    # 根据优化器概率随机决定哪些个体会进行常数优化
     do_optimization = rand(pop.n) .< options.optimizer_probability
-    # 对于每个个体，以50%的概率决定是否进行线性优化
-    do_linear_optimization = do_linear_optimization && (rand(pop.n) .< 0.5)  # 100% 概率进行线性优化
-    # Note: we have to turn off this threading loop due to Enzyme, since we need
-    # to manually allocate a new task with a larger stack for Enzyme.
-    # 确定是否使用多线程：非确定性模式且不使用Enzyme自动微分时启用
+    
+    # 根据linear_optimization_method参数决定是否进行线性优化
+    do_linear_optimization = (options.linear_optimization_method !== nothing) && (rand(pop.n) .< 0.5)
+    
     should_thread = !(options.deterministic) && !(isa(options.autodiff_backend, AutoEnzyme))
-
-    # 如果启用批处理，则创建批处理数据集
     batched_dataset = options.batching ? batch(dataset, options.batch_size) : dataset
 
-    # 根据should_thread决定是否使用多线程处理种群中的每个个体
     @threads_if should_thread for j in 1:(pop.n)
-        # 如果启用了简化功能
         if options.should_simplify
-            # 获取当前个体的表达式树
             tree = pop.members[j].tree
-            # 简化表达式树
             tree = simplify_tree!(tree, options.operators)
-            # 合并操作符（如合并连续的同类运算）
             tree = combine_operators(tree, options.operators)
-            # 将简化后的树赋值回个体
             pop.members[j].tree = tree
         end
-        # 如果启用了常数优化且当前个体需要优化
+        
         if options.should_optimize_constants && do_optimization[j]
-            # TODO: Might want to do full batch optimization here?
-            # 对个体的常数进行优化，并记录评估次数
             pop.members[j], array_num_evals[j] = optimize_constants(
                 batched_dataset, pop.members[j], options
             )
         end
-        # 添加线性优化逻辑
-        # 如果当前个体需要进行线性优化
+        
+        # 线性优化逻辑
         if do_linear_optimization[j]
-            # 对个体进行多线性优化，并获取优化后的个体和评估次数
-            optimized_member, linear_evals = optimize_multilinear_individual(
-                pop.members[j], batched_dataset, options
+            optimized_member, linear_evals = optimize_linear_individual(
+                pop.members[j], batched_dataset, options;
+                method=options.linear_optimization_method
             )
-            # 更新个体为优化后的结果
             pop.members[j] = optimized_member
-            # 累加线性优化的评估次数
             array_num_evals[j] += linear_evals
         end
     end

@@ -618,7 +618,7 @@ $(OPTION_DESCRIPTIONS)
     optimizer_f_calls_limit::Union{Nothing,Integer}=nothing,
     optimizer_options::Union{Dict,NamedTuple,Optim.Options,Nothing}=nothing,
     should_optimize_constants::Bool=true,
-    enable_linear_optimization::Bool=true,
+    linear_optimization_method::Union{Nothing,Symbol}=nothing,
     ## 8. Migration between Populations:
     migration::Bool=true,
     hof_migration::Bool=true,
@@ -745,6 +745,12 @@ $(OPTION_DESCRIPTIONS)
         else
             Optim.BFGS(; linesearch=LineSearches.BackTracking())
         end
+    end
+    
+    # Validate linear_optimization_method parameter
+    if linear_optimization_method !== nothing && 
+       linear_optimization_method ∉ [:correlation, :stepwise]
+        throw(ArgumentError("linear_optimization_method must be :correlation, :stepwise, or nothing"))
     end
     if output_file !== nothing
         error("`output_file` is deprecated. Use `output_directory` instead.")
@@ -1104,6 +1110,7 @@ $(OPTION_DESCRIPTIONS)
         deterministic,
         define_helper_functions,
         use_recorder,
+        linear_optimization_method,
     )
 
     return options

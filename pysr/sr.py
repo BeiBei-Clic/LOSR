@@ -893,6 +893,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
         should_simplify: bool = True,
         should_optimize_constants: bool = True,
         enable_linear_optimization: bool = True,
+        linear_optimization_method: str = "original",
         optimizer_algorithm: Literal["BFGS", "NelderMead"] = "BFGS",
         optimizer_nrestarts: int = 2,
         optimizer_f_calls_limit: int | None = None,
@@ -1003,6 +1004,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
         # -- Constants parameters
         self.should_optimize_constants = should_optimize_constants
         self.enable_linear_optimization = enable_linear_optimization
+        self.linear_optimization_method = linear_optimization_method
         self.optimizer_algorithm = optimizer_algorithm
         self.optimizer_nrestarts = optimizer_nrestarts
         self.optimizer_f_calls_limit = optimizer_f_calls_limit

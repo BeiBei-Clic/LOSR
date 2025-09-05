@@ -61,6 +61,11 @@ export Population,
     with_contents,
     with_metadata,
 
+    # Linear optimization functions
+    optimize_linear_individual,
+    optimize_multilinear_individual,
+    optimize_stepwise_linear_individual,
+
     #Operators
     plus,
     sub,
@@ -304,6 +309,10 @@ using .HallOfFameModule:
     HallOfFame, calculate_pareto_frontier, string_dominating_pareto_curve
 using .MutateModule: mutate!, condition_mutation_weights!, MutationResult
 using .SingleIterationModule: s_r_cycle, optimize_and_simplify_population
+using .LinearOptimizationModule: 
+    optimize_linear_individual, 
+    optimize_multilinear_individual, 
+    optimize_stepwise_linear_individual
 using .ProgressBarsModule: WrappedProgressBar
 using .RecorderModule: @recorder, find_iteration_from_record
 using .MigrationModule: migrate!

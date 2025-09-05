@@ -205,7 +205,7 @@ struct Options{
     hof_migration::Bool
     should_simplify::Bool
     should_optimize_constants::Bool
-    enable_linear_optimization::Bool
+    linear_optimization_method::Union{Nothing,Symbol}
     output_directory::Union{String,Nothing}
     populations::Int
     perturbation_factor::Float32
