@@ -29,9 +29,9 @@ def create_model_params(seed=1):
         "extra_sympy_mappings": {"inv": lambda x: 1 / x},
         "procs": 30,
         "multithreading": True,
-        "populations": 30,
+        "populations": 90,
         "population_size": 200,
-        "niterations": 100,
+        "niterations": 500,
         "maxsize": 15,
         "should_optimize_constants": True,
         "optimizer_algorithm": "BFGS",
@@ -143,7 +143,7 @@ def process_dataset(dataset_path, dataset_name):
     # 运行不同配置的实验 - 使用一个超参数控制线性优化
     linear_optimization_methods = [
         ("关闭线性优化", "none"),
-        ("传统相关性线性优化", "correlation"),
+        # ("传统相关性线性优化", "correlation"),
         ("双向逐步回归线性优化", "stepwise")
     ]
     
@@ -207,7 +207,11 @@ def process_dataset(dataset_path, dataset_name):
     # 生成带时间戳的文件名，保存到指定目录
     now = datetime.now()
     timestamp = now.strftime("%m%d%H%M")
-    result_file = f'/home/xyh/LOSR/result/{dataset_name}_{timestamp}.json'
+    # 修改为相对路径保存
+    result_file = f'result/{dataset_name}_{timestamp}.json'
+    
+    # 确保目录存在
+    os.makedirs('result', exist_ok=True)
     
     with open(result_file, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
